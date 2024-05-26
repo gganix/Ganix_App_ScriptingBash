@@ -1,0 +1,49 @@
+#!/bin/bash
+
+mostrar_error_salir() {
+    echo "$1" >&2
+    echo "$1" >> "$HOME/CopiaSeguridad/errores.txt" 
+    exit 1
+}
+
+if [ "$#" -ne 0 ]; then
+    mostrar_error_salir "El script no necesita parámetros"
+fi
+
+if [[ $(whoami) != "root" ]]; then
+    mostrar_error_salir "Este script necesita privilegios de administrador, ejecuta [sudo ./scrMenu]."
+fi
+
+tareas_programadas=$(crontab -l 2> /dev/null)
+if [ -z "$tareas_programadas" ]; then
+    zenity --info --text="No hay tareas programadas actualmente." >> "$HOME/CopiaSeguridad/salidas.txt" 2>> "$HOME/CopiaSeguridad/errores.txt"
+    exit
+fi
+
+IFS=$'\n' read -r -d '' -a tareas_programadas <<<"$tareas_programadas"
+
+lista_tareas=()
+for tarea in "${tareas_programadas[@]}"; do
+    tarea_nombre=$(echo "$tarea" | sed 's/.*# \(.*\)$/\1/')
+    lista_tareas+=("$tarea_nombre")
+done
+
+tarea_cancelar=$(zenity --list \
+                        --title="Cancelar Programación" \
+                        --text="Selecciona la tarea a cancelar:" \
+                        --column="Tarea Programada" "${lista_tareas[@]}" 2> /dev/null)
+
+if [ -z "$tarea_cancelar" ]; then
+    mostrar_error_salir "No se ha seleccionado ninguna tarea para cancelar."
+fi
+
+nuevo_crontab=$(crontab -l 2> /dev/null | sed "/# $tarea_cancelar/d")
+
+if [ $? -eq 0 ]; then
+    echo "$nuevo_crontab" | crontab -
+    zenity --info --text="La tarea se ha cancelado con éxito." >> "$HOME/CopiaSeguridad/salidas.txt" 2>> "$HOME/CopiaSeguridad/errores.txt"
+else
+    mostrar_error_salir "Error al cancelar la tarea programada."
+fi
+
+exit

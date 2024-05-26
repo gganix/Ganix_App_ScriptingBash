@@ -1,0 +1,52 @@
+#!/bin/bash
+
+mostrar_error_salir() {
+    echo "$1"
+    echo "$1" >> "$HOME/CopiaSeguridad/errores.txt"
+    exit 1
+}
+
+ruta_copia="$HOME/CopiaSeguridad"
+if [ ! -d "$ruta_copia" ]; then
+    mkdir -p "$ruta_copia"
+fi
+
+if [ "$#" -ne 0 ]; then
+    mostrar_error_salir "El script no necesita parámetros" 
+fi
+
+if ! command -v zenity &> /dev/null; then
+    mostrar_error_salir "Error: Zenity no está instalado. Por favor, instálalo para usar esta aplicación."
+fi
+
+for script in scrProgramar scrCopiar scrCancelar; do
+    if [ ! -x "$script" ]; then
+        mostrar_error_salir "Error: El script '$script' no tiene permisos de ejecución."
+    fi
+    if [ ! -f "$script" ]; then
+        mostrar_error_salir "Error: El script '$script' no existe en el directorio actual."
+    fi
+done
+
+opcion=$(zenity --list \
+                --title="Gestor de Copias de Seguridad" \
+                --text="Selecciona una opción:" \
+                --column="Opción" --column="Descripción" \
+                1 "Programar Copia de Seguridad" \
+                2 "Realizar Copia de Seguridad Ahora" \
+                3 "Cancelar Programación" \
+                4 "Salir" 2> "$HOME/CopiaSeguridad/errorZenity.txt")
+
+salida=$?
+
+if [ $salida -eq 1 ]; then
+    exit
+fi
+
+case $opcion in
+    1) ./scrProgramar ;; 
+    2) ./scrCopiar ;; 
+    3) ./scrCancelar ;;
+    4) exit ;; 
+    *) zenity --error --text="Opción inválida" ;;
+esac

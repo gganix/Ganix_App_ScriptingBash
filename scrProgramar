@@ -1,0 +1,76 @@
+#!/bin/bash
+
+mostrar_error_salir() {
+    echo "$1"
+    echo "$1" >> "$HOME/CopiaSeguridad/errores.txt" 
+    exit 1
+}
+
+if [ "$#" -ne 0 ]; then
+    mostrar_error_salir "El script no necesita parámetros"
+fi
+
+if ! command -v zenity &> /dev/null; then
+    mostrar_error_salir "Error: Zenity no está instalado. Por favor, instálalo para usar esta aplicación."
+fi
+
+ruta_copia="$HOME/CopiaSeguridad"
+if [ ! -d "$ruta_copia" ]; then
+    mkdir -p "$ruta_copia"
+fi
+
+ruta=$(zenity --file-selection --directory --title="Selecciona el directorio" 2> /dev/null)
+if [ $? -ne 0 ]; then
+    mostrar_error_salir "No se ha seleccionado ninguna ruta."
+fi
+
+nombre_tarea=$(zenity --entry --title="Nombre de la tarea" --text="Introduce un nombre para la tarea:" 2> /dev/null)
+if [ -z "$nombre_tarea" ]; then
+    mostrar_error_salir "No se ha proporcionado un nombre para la tarea."
+fi
+
+dias=$(zenity --list \
+              --title="Programar Copia de Seguridad" \
+              --text="Selecciona los días de la semana para la copia de seguridad:" \
+              --checklist \
+              --column="Seleccionar" --column="Día" \
+              FALSE "Lunes" \
+              FALSE "Martes" \
+              FALSE "Miércoles" \
+              FALSE "Jueves" \
+              FALSE "Viernes" \
+              FALSE "Sábado" \
+              FALSE "Domingo" 2> /dev/null)
+if [ -z "$dias" ]; then
+    mostrar_error_salir "No se han seleccionado días de la semana."
+fi
+
+cron_dias=""
+for dia in $(echo "$dias" | tr "|" " "); do
+    case $dia in
+        "Lunes") cron_dias+="1," ;;
+        "Martes") cron_dias+="2," ;;
+        "Miércoles") cron_dias+="3," ;;
+        "Jueves") cron_dias+="4," ;;
+        "Viernes") cron_dias+="5," ;;
+        "Sábado") cron_dias+="6," ;;
+        "Domingo") cron_dias+="0," ;;
+    esac
+done
+
+cron_dias=${cron_dias%,}
+if [ -z "$cron_dias" ]; then
+    mostrar_error_salir "No se han seleccionado días de la semana."
+fi
+
+cron_entry="0 0 * * $cron_dias cp -r \"$ruta\" \"$ruta_copia\" >> $HOME/CopiaSeguridad/salidas.txt 2>> $HOME/CopiaSeguridad/errores.txt # $nombre_tarea"
+
+echo "$cron_entry" | sudo crontab -
+
+if [ $? -ne 0 ]; then
+    mostrar_error_salir "Error al agregar la tarea programada al crontab."
+else
+    zenity --info --text="Copia de seguridad programada con éxito.\nLa Copia se creará en $HOME/CopiaSeguridad" >> "$HOME/CopiaSeguridad/salidas.txt" 2>> "$HOME/CopiaSeguridad/errores.txt"
+fi
+
+exit
