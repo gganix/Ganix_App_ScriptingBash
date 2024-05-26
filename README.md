@@ -10,6 +10,15 @@ Para utilizar estos scripts, sigue los siguientes pasos:
 2. Abre una terminal y navega hasta la ubicación donde se encuentran los scripts utilizando el comando `cd`.
 3. Otorga permisos de ejecución al script principal `scrMenu` ejecutando el comando `chmod +x ./scrMenu`.
 
+## Ubicación de los Archivos
+
+Las copias de seguridad se crean en la ruta `Home/usuario/CopiadeSeguridad`. Los mensajes de error generados por los scripts también se guardan en esta ubicación, permitiendo al usuario identificar y resolver cualquier problema que pueda surgir durante la ejecución de los scripts.
+
+Se recomienda revisar los archivos de texto en esta ubicación en caso de que ocurran errores durante la ejecución de los scripts.
+
+¡Disfruta de una gestión más sencilla de tus copias de seguridad con estos scripts!
+
+
 ## Descripción de los Scripts
 
 ### scrMenu
@@ -33,10 +42,3 @@ Este script realiza una copia de seguridad inmediata del directorio seleccionado
 
 Este script permite al usuario cancelar una tarea de copia de seguridad programada previamente. Muestra una lista de las tareas programadas y solicita al usuario que elija la tarea que desea cancelar.
 
-## Ubicación de los Archivos
-
-Las copias de seguridad se crean en la ruta `Home/usuario/CopiadeSeguridad`. Los mensajes de error generados por los scripts también se guardan en esta ubicación, permitiendo al usuario identificar y resolver cualquier problema que pueda surgir durante la ejecución de los scripts.
-
-Se recomienda revisar los archivos de texto en esta ubicación en caso de que ocurran errores durante la ejecución de los scripts.
-
-¡Disfruta de una gestión más sencilla de tus copias de seguridad con estos scripts!
