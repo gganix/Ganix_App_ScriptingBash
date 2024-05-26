@@ -1,6 +1,6 @@
 # Gestor de Copias de Seguridad
 
-Este repositorio contiene un conjunto de scripts escritos en Bash para facilitar la gestión de copias de seguridad en sistemas Ubuntu.
+Este repositorio contiene un conjunto de scripts escritos en Shell Bash para facilitar la gestión de copias de seguridad en sistemas Ubuntu.
 
 ## Uso
 
